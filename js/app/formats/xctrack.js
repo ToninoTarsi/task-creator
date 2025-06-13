@@ -121,8 +121,11 @@ define(['rejs!formats/export/xctrack', 'rejs!formats/templates/publishResultModa
 
         var generateXCInfo = function (turnpoints, taskInfo) {
             var xcInfo = {};
+            var hasSss = false;
+            var hasEss = false;
             for (var i = 0; i < turnpoints.length; i++) {
                 if (turnpoints[i].type == "start") {
+                    hasSss = true;
                     xcInfo.timeGates = [];
                     xcInfo.firstStartGateLocal = turnpoints[i].open
                     const ngates = parseInt(turnpoints[i].ngates, 10) || 1;
@@ -135,7 +138,22 @@ define(['rejs!formats/export/xctrack', 'rejs!formats/templates/publishResultModa
                     xcInfo.type = converter[taskInfo.type] ? converter[taskInfo.type] : taskInfo.type;;
                     xcInfo.direction = converter[turnpoints[i].mode] ? converter[turnpoints[i].mode] : turnpoints[i].mode;
                 }
+
+                else if (turnpoints[i].type == "end-of-speed-section") {
+                    hasEss = true;
+                }
             }
+
+            if (!hasSss) {
+                alert("Task must have a start (SSS) turnpoint.");
+                return null;
+            }
+
+            if (!hasEss) {
+                alert("Task must have an ESS turnpoint.");
+                return null;
+            }
+
             for (var i = 0; i < turnpoints.length; i++) {
                 if (turnpoints[i].type == "goal") {
                     xcInfo.deadline = timeUtils.localToUtc(turnpoints[i].close, taskInfo.utcOffset) + ':00Z';
@@ -161,6 +179,8 @@ define(['rejs!formats/export/xctrack', 'rejs!formats/templates/publishResultModa
             const data = exporter(turnpoints, taskInfo);
             const fileContent = await data.text();
             var xcInfo = generateXCInfo(turnpoints, taskInfo);
+
+            if (!xcInfo) {return; } // If xcInfo is null, exit the function
 
             try {
                 // Show the author modal
