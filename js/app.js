@@ -32,8 +32,7 @@ requirejs.config({
         tracks: "../js/app/tracks",
         waypoints: "../js/app/waypoints",
         jgrowl: "jGrowl/jquery.jgrowl.min",
-        'xml-formatter': 'xml-formatter/xml-formatter',
-        geographiclib: "../js/lib/geographiclib/geographiclib.min",
+                geographiclib: "../js/lib/geographiclib/geographiclib.min",
         proj4: "../js/lib/proj4/proj4",
         html2canvas: "../js/lib/html2canvas/html2canvas.min",
         polyline: "../js/app/polyline", // Aggiungi il percorso di polyline

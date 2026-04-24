@@ -181,12 +181,28 @@ define(['rejs!formats/export/FsTask', 'utils/timeUtils', 'formats/FsTask'], func
 
     var xmlAsStr = '<?xml version="1.0" encoding="utf-8"?>' + (x2js.json2xml_str(jsonDB));
 
-
-    var format = require('xml-formatter');
-    var options = { indentation: '  ' };
-    var formattedXml = format(xmlAsStr, options).replace(/\n/g, "\r\n");;
+    var formattedXml = formatXml(xmlAsStr);
 
     return new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), formattedXml], { 'type': "text/xml" });
+  }
+
+  function formatXml(xml) {
+    xml = xml.replace(/>(\s*)</g, ">\r\n<");
+    var pad = 0;
+    return xml.split(/\r\n/).map(function(node) {
+      var indent = 0;
+      if (node.match(/^<\/?\w[^>]*>$/)) {
+        if (node.match(/^<\/\w/)) {
+          pad = Math.max(pad - 1, 0);
+        } else if (node.match(/^<\w[^>]*[^\/]>/)) {
+          indent = 1;
+        }
+      }
+      var padding = Array(pad + 1).join('  ');
+      var line = padding + node;
+      pad += indent;
+      return line;
+    }).join('\r\n');
   }
 
   return {
